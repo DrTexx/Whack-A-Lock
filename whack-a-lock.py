@@ -21,7 +21,7 @@ import ctypes
 from time import sleep
 
 # ---- CONSTANTS ----
-SECONDS_TO_WAIT = 1.0
+INITIAL_SECONDS_TO_WAIT = 1.0
 KEY_CANDIDATES = [
     {
         "name": "Caps Lock",
@@ -55,8 +55,8 @@ def on_press(cancel_timer, target_key):
                 return False  # Stop listener
             else:
                 print("wrong key!!")
-                # cancel_timer()
-                # return False
+                cancel_timer()
+                return False
         except AttributeError:
             pass
     return _on_press
@@ -68,12 +68,14 @@ def choose_random_key(key_candidates):
     chosen_key = key_candidates[floor(random()*3)]
     return chosen_key
 
-def wait_for_keypress():
+def wait_for_keypress(seconds_to_wait):
     global key_pressed
+    
+    key_pressed = False
     
     target_key = choose_random_key(KEY_CANDIDATES)
     
-    timer = threading.Timer(SECONDS_TO_WAIT, on_too_slow)
+    timer = threading.Timer(seconds_to_wait, on_too_slow)
 
     # press the key to signify it's popped up to hit
     keyboard.Controller().press(target_key["pnyput_key_obj"])
@@ -145,20 +147,20 @@ class KeyGame:
     def __exit__(self, exc_type, exc_val, exc_tb):
         # restore key states
         if self.caps_was_on != is_caps_on():
-            print("caps needs toggling back")
+            # print("caps needs toggling back")
             keyboard.Controller().press(keyboard.Key.caps_lock)
             keyboard.Controller().release(keyboard.Key.caps_lock)
         if self.scrlk_was_on != is_scrlk_on():
-            print("scroll needs toggling back")
+            # print("scroll needs toggling back")
             keyboard.Controller().press(keyboard.Key.scroll_lock)
             keyboard.Controller().release(keyboard.Key.scroll_lock)
         if self.numlk_was_on != is_numlk_on():
-            print("num needs toggling back")
+            # print("num needs toggling back")
             keyboard.Controller().press(keyboard.Key.num_lock)
             keyboard.Controller().release(keyboard.Key.num_lock)
 
 def blink_all(wait_after_on, wait_after_off):
-    print("blinking on!")
+    # print("blinking on!")
     keyboard.Controller().press(keyboard.Key.caps_lock)
     keyboard.Controller().release(keyboard.Key.caps_lock)
     keyboard.Controller().press(keyboard.Key.scroll_lock)
@@ -166,7 +168,7 @@ def blink_all(wait_after_on, wait_after_off):
     keyboard.Controller().press(keyboard.Key.num_lock)
     keyboard.Controller().release(keyboard.Key.num_lock)
     sleep(wait_after_on)
-    print("blinking off!")
+    # print("blinking off!")
     keyboard.Controller().press(keyboard.Key.caps_lock)
     keyboard.Controller().release(keyboard.Key.caps_lock)
     keyboard.Controller().press(keyboard.Key.scroll_lock)
@@ -187,15 +189,19 @@ with KeyGame():
     sleep(1)
     print("Go!")
 
-    wait_for_keypress()
-    toggle_all_lock_keys_off()
-    sleep(0.2)
-    wait_for_keypress()
-    toggle_all_lock_keys_off()
-    sleep(0.2)
-    wait_for_keypress()
-    toggle_all_lock_keys_off()
-    sleep(0.2)
+    time_to_wait = INITIAL_SECONDS_TO_WAIT
+    key_pressed = True
+    rounds = 0
+
+    while key_pressed == True:
+        wait_for_keypress(time_to_wait)
+        toggle_all_lock_keys_off()
+        sleep(0.2)
+        time_to_wait = time_to_wait*0.9
+        rounds += 1
+
+    print("rounds:", rounds)
+
 
     blink_all(0.2, 0.2)
     blink_all(0.2, 0.2)
