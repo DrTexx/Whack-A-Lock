@@ -2,11 +2,19 @@
 
 A game of whack-a-mole that can be played with the Caps Lock, Scroll Lock and Num Lock keys.
 
-## How To Play
+---
+
+&nbsp;&nbsp;**How To Play**
+
+---
 
 Run the script with Python from your terminal.
 
-## AKA
+---
+
+&nbsp;&nbsp;**AKA**
+
+---
 
 - Whacky Keys
 - Smacky Keys
